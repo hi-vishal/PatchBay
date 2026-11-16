@@ -1,0 +1,9 @@
+# Read by Cloudflare Pages and Netlify when the built client is hosted on their free CDN.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin

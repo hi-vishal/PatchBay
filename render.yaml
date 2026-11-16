@@ -1,0 +1,67 @@
+# Render Blueprint for the API on Render's free plan. In the Render dashboard choose
+# New > Blueprint and pick this repository. Values marked `sync: false` are asked for once, when
+# the Blueprint is first applied. Leave any you do not use empty. See "Host it for free" in README.md.
+services:
+  - type: web
+    name: patchbay-api
+    runtime: docker
+    plan: free
+    # Singapore is the closest free region to India. Change it if your users are elsewhere.
+    region: singapore
+    # The build context is the repo root, because npm workspaces need the root lockfile.
+    dockerContext: .
+    dockerfilePath: ./server/Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render sits in front of the app, so the client address comes from X-Forwarded-For.
+      - key: TRUST_PROXY
+        value: 'true'
+      # A free instance has one small CPU and 512 MB of memory.
+      - key: WEB_CONCURRENCY
+        value: '1'
+      # The free MongoDB Atlas tier allows 500 connections in total.
+      - key: MONGODB_MAX_POOL_SIZE
+        value: '10'
+      # Lets OpenRouter pick one of its free models when a request names no model.
+      - key: DEFAULT_MODEL
+        value: openrouter:openrouter/free
+
+      # Your site's address, such as https://patchbay.pages.dev. Comma separate several.
+      - key: CORS_ORIGINS
+        sync: false
+      # The Atlas connection string, including the database name.
+      - key: MONGODB_URI
+        sync: false
+      # Generate with: openssl rand -base64 32. Keep it: changing it makes saved keys unreadable.
+      - key: ENCRYPTION_KEY
+        sync: false
+
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      # Paste it with the \n sequences as they are in the service account JSON.
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+
+      # At least one model key, unless every user adds their own in Settings.
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+
+      # Test mode only. The server refuses a key that does not start with rzp_test_.
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: RAZORPAY_PRO_PLAN_ID
+        sync: false

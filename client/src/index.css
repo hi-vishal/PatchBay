@@ -1,0 +1,381 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* `.rack` is a surface that stays dark in both themes: the landing hero, the sign-in panel. */
+@custom-variant dark (&:is(.dark *, .rack, .rack *));
+
+/*
+ * "Faceplate" palette. Neutrals come from studio hardware: brushed aluminium in the light theme,
+ * anodized graphite in the dark one. There is one accent, the orange of a live signal, and it is
+ * kept for things that are active or that we want pressed. Buttons are ink, not accent.
+ */
+:root {
+  --background: #f2f3f5;
+  --foreground: #14161a;
+  --card: #ffffff;
+  --card-foreground: #14161a;
+  --popover: #ffffff;
+  --popover-foreground: #14161a;
+  --primary: #14161a;
+  --primary-foreground: #ffffff;
+  --secondary: #e7e9ec;
+  --secondary-foreground: #14161a;
+  --muted: #e9ebee;
+  --muted-foreground: #59606a;
+  --accent: #e7e9ec;
+  --accent-foreground: #14161a;
+  --destructive: #cf3a34;
+  --border: #dcdfe4;
+  --input: #c3c8cf;
+  --ring: #d9641c;
+  --radius: 0.625rem;
+
+  --link: #a84a0c;
+  --signal: #f07a2e;
+  --signal-foreground: #1a0f06;
+  --success: #17804d;
+  --warning: #8f5d06;
+  --danger: #b9322c;
+
+  /* One color per kind of step, used on cables, nodes and the steps timeline. */
+  --node-llm: #2161d1;
+  --node-agent: #6a45d4;
+  --node-tool: #0b7a6b;
+  --node-condition: #84650a;
+  --node-approval: #b61d61;
+
+  /* A lit top edge and a shadow tinted to the surface, so panels read as machined parts. */
+  --edge: inset 0 1px 0 rgb(255 255 255 / 0.85);
+  --lift: 0 1px 2px rgb(20 22 26 / 0.05), 0 14px 32px -18px rgb(20 22 26 / 0.18);
+  --perf: rgb(20 22 26 / 0.07);
+}
+
+.dark,
+.rack {
+  --background: #15171a;
+  --foreground: #eef0f2;
+  --card: #1c1f23;
+  --card-foreground: #eef0f2;
+  --popover: #22252a;
+  --popover-foreground: #eef0f2;
+  --primary: #eef0f2;
+  --primary-foreground: #15171a;
+  --secondary: #272b30;
+  --secondary-foreground: #eef0f2;
+  --muted: #1f2226;
+  --muted-foreground: #9ba3ad;
+  --accent: #272b30;
+  --accent-foreground: #eef0f2;
+  --destructive: #e5584f;
+  --border: #2d3238;
+  --input: #3b414a;
+  --ring: #f07a2e;
+
+  --link: #f6a46c;
+  --signal: #f07a2e;
+  --signal-foreground: #1a0f06;
+  --success: #4fc48c;
+  --warning: #e6b450;
+  --danger: #f27d72;
+
+  --node-llm: #6aa9ff;
+  --node-agent: #b39bff;
+  --node-tool: #3fcfb4;
+  --node-condition: #e6c84a;
+  --node-approval: #f285b5;
+
+  --edge: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --lift: 0 1px 2px rgb(0 0 0 / 0.3), 0 18px 40px -20px rgb(0 0 0 / 0.7);
+  --perf: rgb(255 255 255 / 0.055);
+}
+
+/* A shade deeper than the dark theme, so a rack panel still reads as its own surface there. */
+.rack {
+  --background: #0f1114;
+  --card: #181b1f;
+  --popover: #1e2126;
+  --muted: #1a1d21;
+  --secondary: #23272c;
+  --accent: #23272c;
+  --border: #2a2f35;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-node-llm: var(--node-llm);
+  --color-node-agent: var(--node-agent);
+  --color-node-tool: var(--node-tool);
+  --color-node-condition: var(--node-condition);
+  --color-node-approval: var(--node-approval);
+
+  /* Radius follows hierarchy: controls are tight, panels are softer, landing tiles softer still. */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
+  --radius-3xl: calc(var(--radius) + 18px);
+
+  --font-display: 'Archivo Variable', 'Arial', sans-serif;
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+  --shadow-edge: var(--edge);
+  --shadow-lift: var(--edge), var(--lift);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-rise: rise 0.7s var(--ease-out-expo) both;
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-blink: blink 1.1s steps(2, start) infinite;
+  --animate-led: led 2.4s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-dash: dash 1.1s linear infinite;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 14px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes marquee {
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  @keyframes blink {
+    to {
+      visibility: hidden;
+    }
+  }
+  @keyframes led {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -28;
+    }
+  }
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.55;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--signal) 35%, transparent);
+  }
+}
+
+@layer components {
+  /* Archivo is set wide, like the nameplate on a piece of studio gear. */
+  .font-display {
+    font-stretch: 112%;
+    letter-spacing: -0.022em;
+  }
+
+  /* Perforated-panel texture. Static, so it costs nothing while scrolling. */
+  .perf {
+    background-image: radial-gradient(circle, var(--perf) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+  }
+
+  /* A panel: lit top edge, tinted drop shadow. */
+  .panel {
+    @apply rounded-xl border bg-card;
+    box-shadow: var(--edge), var(--lift);
+  }
+
+  /* The border lights up under the pointer. `--mx` and `--my` are set by useSpotlight. */
+  .spotlight {
+    position: relative;
+  }
+  .spotlight::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--signal) 85%, transparent),
+      transparent 62%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-out-expo);
+    pointer-events: none;
+  }
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* Sections fade up once, the first time they scroll into view. Set by useReveal. */
+  [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    transition:
+      opacity 0.8s var(--ease-out-expo),
+      transform 0.8s var(--ease-out-expo);
+    transition-delay: calc(var(--i, 0) * 70ms);
+  }
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* A cable that plugs itself in when its section scrolls into view. Needs pathLength="1". */
+  .cable-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.9s var(--ease-out-expo) 0.25s;
+  }
+  .is-visible .cable-draw {
+    stroke-dashoffset: 0;
+  }
+
+  /* FAQ rows. The marker is replaced by our own chevron. */
+  details > summary {
+    list-style: none;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      100deg,
+      var(--accent) 30%,
+      color-mix(in oklab, var(--accent) 60%, var(--card)) 50%,
+      var(--accent) 70%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+}
+
+/* React Flow ships its own near-black dark theme. These keep the board on the app's palette. */
+.react-flow {
+  --xy-background-color: var(--background);
+  --xy-background-pattern-color: var(--border);
+  --xy-edge-stroke: var(--muted-foreground);
+  --xy-controls-button-background-color: var(--card);
+  --xy-controls-button-background-color-hover: var(--accent);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-color-hover: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+}
+
+/* Code in chat replies. These use the app's text tones, so they follow the light and dark themes. */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: var(--node-llm);
+}
+
+.hljs-string,
+.hljs-attr,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+  color: var(--success);
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-type,
+.hljs-title {
+  color: var(--warning);
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-meta {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.hljs-deletion {
+  color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}

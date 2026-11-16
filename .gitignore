@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+
+# Secrets. Only the *.example files are committed.
+.env
+.env.*
+!.env.example
+*-service-account*.json

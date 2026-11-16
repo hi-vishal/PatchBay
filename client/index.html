@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Build AI agents, connect them to your tools over MCP, and watch every step they take."
+    />
+    <meta name="author" content="Vishal Gupta" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Patchbay</title>
+    <script>
+      // Applied before first paint, so a dark-mode visitor never sees a white flash.
+      (function () {
+        var stored = localStorage.getItem('patchbay-theme');
+        var dark =
+          stored === 'dark' ||
+          (stored !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
