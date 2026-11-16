@@ -6,18 +6,17 @@
 
 **Build AI agents, wire them to your tools over MCP, and watch every step they take.**
 
-An AI automation platform: streaming chat, custom agents, MCP tool servers, visual LangGraph workflows with human approval, and paid plans through Razorpay.
+Streaming chat, custom agents, MCP tool servers, visual LangGraph workflows with human approval, and paid plans through Razorpay.
 
 ![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-agents-1C3C3C?logo=langchain&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?logo=firebase&logoColor=black)
 ![Razorpay](https://img.shields.io/badge/Razorpay-test%20mode-0C2451?logo=razorpay&logoColor=white)
-
-Created by **Vishal Gupta** · [hii.vishalgupta@gmail.com](mailto:hii.vishalgupta@gmail.com)
 
 </div>
 
@@ -28,28 +27,38 @@ Created by **Vishal Gupta** · [hii.vishalgupta@gmail.com](mailto:hii.vishalgupt
 - [Features](#features)
 - [Screenshots](#screenshots)
 - [Tech stack](#tech-stack)
-- [Quick start](#quick-start)
-- [Setup you need to do](#setup-you-need-to-do)
-- [Promo codes (unlimited use)](#promo-codes-unlimited-use)
-- [Tests](#tests)
-- [Architecture](#architecture)
+- [Project structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Run it locally](#run-it-locally)
+- [Configuration](#configuration)
+- [Environment variables](#environment-variables)
+- [Scripts](#scripts)
+- [Testing](#testing)
 - [Host it for free](#host-it-for-free)
+- [Host it on a paid plan](#host-it-on-a-paid-plan)
+- [Promo codes](#promo-codes)
+- [Plans and limits](#plans-and-limits)
+- [Architecture](#architecture)
+- [API overview](#api-overview)
+- [Scaling](#scaling)
 - [Security](#security)
 - [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
 - [Author](#author)
-- [Trademark and copyright](#trademark-and-copyright)
+- [License](#license)
 
 ## Features
 
-- **Streaming chat** with saved history. Switch models mid-conversation, stop a reply partway, or retry one that failed.
-- **Any model you like.** OpenAI, Anthropic, Google, OpenRouter (including its free models) and local models through Ollama. Each person can add their own API keys in Settings.
+- **Streaming chat** with saved history. Switch models mid-conversation, stop a reply, or retry a failed one.
+- **Bring any model.** OpenAI, Anthropic, Google, OpenRouter (including its free models) and local models through Ollama. Each user can add their own API keys in Settings.
 - **Custom agents** with their own instructions, model, built-in tools and MCP servers, tested on the same screen you build them on.
+- **Built-in tools:** `http_request`, `web_fetch`, `calculator` and `current_time`.
 - **MCP tool servers** over HTTP or SSE. Credentials are encrypted with AES-256-GCM, and a failing server never takes a run down with it.
-- **Visual workflows** built on a board, with prompt, agent, tool, condition and human approval steps, compiled to LangGraph.
-- **Every step visible.** Each tool call shows its input and output, one click away.
-- **Paid plans** through Razorpay subscriptions (test mode), with usage limits enforced on the server.
-- **Promo codes** that give unlimited use, made by the owner from the command line.
-- **Command palette** (Ctrl/Cmd + K), light and dark themes, and a layout that works on phones.
+- **Visual workflows** on a drag-and-drop board, with prompt, agent, tool, condition and human-approval steps, compiled to LangGraph.
+- **Every step visible.** Each tool call shows its input and output.
+- **Paid plans** through Razorpay subscriptions (test mode), with limits enforced on the server.
+- **Promo codes** for unlimited use, created by the owner from the command line.
+- **Command palette** (Ctrl/Cmd + K), light and dark themes, mobile-friendly layout.
 
 ## Screenshots
 
@@ -63,189 +72,125 @@ Created by **Vishal Gupta** · [hii.vishalgupta@gmail.com](mailto:hii.vishalgupt
 
 ## Tech stack
 
-| Layer    | Tools                                                                                                          |
-| -------- | -------------------------------------------------------------------------------------------------------------- |
-| Client   | React, Vite, TypeScript, Tailwind CSS, shadcn/ui, Redux Toolkit, RTK Query, React Router, React Flow, three.js |
-| Server   | Node.js, Express 5, TypeScript, Mongoose, Zod, LangChain, LangGraph, MCP adapters, firebase-admin, pino        |
-| Data     | MongoDB, with LangGraph checkpoints stored in MongoDB                                                          |
-| Sign-in  | Firebase Authentication (Google and email)                                                                     |
-| Payments | Razorpay subscriptions, test mode only                                                                         |
-| Testing  | Vitest, Supertest, in-memory MongoDB, Playwright                                                               |
-| Delivery | Docker Compose, GitHub Actions CI, Render and Cloudflare Pages                                                 |
+| Layer    | Tools                                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------------------- |
+| Client   | React 19, Vite, TypeScript, Tailwind CSS 4, shadcn/ui, Redux Toolkit, RTK Query, React Router, React Flow, three.js |
+| Server   | Node.js 22, Express 5, TypeScript, Mongoose, Zod, LangChain, LangGraph, MCP adapters, firebase-admin, pino          |
+| Data     | MongoDB (app data and LangGraph checkpoints)                                                                        |
+| Sign-in  | Firebase Authentication (Google and email/password)                                                                 |
+| Payments | Razorpay subscriptions, test mode only                                                                              |
+| Testing  | Vitest, Supertest, mongodb-memory-server, Playwright                                                                |
+| Delivery | Docker Compose, nginx, GitHub Actions CI, Render, Cloudflare Pages                                                  |
 
-## Quick start
+## Project structure
 
-Clone the repository first. You need Docker with Compose, and its runtime running (Docker Desktop, or `colima start`). The stack starts without any accounts, but signing in needs Firebase and chatting needs an LLM key. The sections below list every value.
+npm workspaces monorepo with two packages: `server` and `client`.
+
+```
+.
+├── client/                  React app (Vite)
+│   ├── src/
+│   │   ├── app/             Redux store, router, typed hooks
+│   │   ├── components/      Shared UI (shadcn/ui in components/ui)
+│   │   ├── features/        Feature slices: auth, chat, agents, workflows, billing, ...
+│   │   ├── lib/             API client, SSE parser, Firebase, Razorpay checkout
+│   │   └── pages/           Route components
+│   ├── e2e/                 Playwright smoke test with fake auth and a mocked API
+│   ├── public/              Static files, incl. _headers and _redirects for CDNs
+│   ├── nginx.conf           Serves the build and proxies /api in Docker
+│   └── Dockerfile
+├── server/                  Express API
+│   ├── src/
+│   │   ├── config/          Env validation (Zod), MongoDB, Firebase Admin
+│   │   ├── controllers/     Route handlers
+│   │   ├── middleware/      Auth, plan limits, rate limits, validation, errors
+│   │   ├── models/          Mongoose models
+│   │   ├── routes/          Route definitions
+│   │   ├── services/        LangGraph graphs, LLM providers, MCP manager, tools, billing
+│   │   ├── scripts/         promo.ts (promo code CLI)
+│   │   └── utils/           Crypto, SSRF guard, SSE, logger
+│   ├── test/                Vitest integration tests
+│   ├── loadtest/            autocannon load test
+│   └── Dockerfile
+├── docs/screenshots/
+├── docker-compose.yml       mongo + api + web
+├── render.yaml              Render Blueprint for the API
+├── .env.example             Template for the single root .env
+└── .github/workflows/ci.yml Typecheck, lint, tests, e2e, Docker build
+```
+
+## Prerequisites
+
+| Tool                                                       | Needed for                                 |
+| ---------------------------------------------------------- | ------------------------------------------ |
+| [Node.js](https://nodejs.org) 22.12 or newer               | Running without Docker, tests, promo codes |
+| [Docker](https://docs.docker.com/get-docker/) with Compose | Running the full stack with one command    |
+| MongoDB 8 (local, Docker or Atlas)                         | Running without Docker                     |
+| A Firebase project                                         | Signing in                                 |
+| At least one model provider (or Ollama)                    | Chatting                                   |
+| A Razorpay account in test mode                            | Optional, only for the Pro plan            |
+
+The stack starts without any accounts, but you cannot sign in until Firebase is set up, and you cannot chat until a model is set up. See [Configuration](#configuration).
+
+## Run it locally
+
+### 1. Clone and create `.env`
+
+```bash
+git clone https://github.com/hi-vishal/PatchBay.git patchbay
+```
+
+```bash
+cd patchbay
+```
 
 ```bash
 cp .env.example .env
 ```
 
+Generate an encryption key and paste it into `.env` as `ENCRYPTION_KEY`. The API will not start without it.
+
 ```bash
 openssl rand -base64 32
 ```
 
-Put that output in `.env` as `ENCRYPTION_KEY`. The API will not start without it. Then:
+No `openssl` (Windows)? Use Node instead:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Then fill in Firebase and at least one model, as described in [Configuration](#configuration).
+
+### 2a. Option A: Docker Compose (recommended)
+
+Start Docker (Docker Desktop, or `colima start` on macOS), then:
 
 ```bash
 docker compose up --build
 ```
 
-Open http://localhost:8080.
+Open http://localhost:8080. Compose runs three containers:
 
-## Setup you need to do
+| Service | What it is                                      | Address               |
+| ------- | ----------------------------------------------- | --------------------- |
+| `web`   | nginx serving the built client, proxying `/api` | http://localhost:8080 |
+| `api`   | Express API                                     | http://localhost:4000 |
+| `mongo` | MongoDB 8 with a named volume `mongo-data`      | `localhost:27017`     |
 
-Everything here goes in the root `.env`, which is git-ignored. Both the server and the client read that one file.
+All ports bind to `127.0.0.1` only. Stop with `Ctrl+C`, or `docker compose down`. Add `-v` to also delete the database volume.
 
-### 1. Firebase (sign-in)
+`VITE_*` values are baked into the web image at build time, so run `docker compose up --build` again after changing them.
 
-1. Create a project in the [Firebase console](https://console.firebase.google.com).
-2. Go to **Build > Authentication > Sign-in method**. Enable **Google** and **Email/Password**.
-3. Go to **Project settings > General > Your apps** and add a **Web** app. Copy these values:
+### 2b. Option B: Node directly (for development)
 
-   | `.env`                      | Firebase config |
-   | --------------------------- | --------------- |
-   | `VITE_FIREBASE_API_KEY`     | `apiKey`        |
-   | `VITE_FIREBASE_AUTH_DOMAIN` | `authDomain`    |
-   | `VITE_FIREBASE_PROJECT_ID`  | `projectId`     |
-   | `VITE_FIREBASE_APP_ID`      | `appId`         |
-
-4. Go to **Project settings > Service accounts > Generate new private key**. Copy these values from the downloaded JSON:
-
-   | `.env`                  | JSON field     |
-   | ----------------------- | -------------- |
-   | `FIREBASE_PROJECT_ID`   | `project_id`   |
-   | `FIREBASE_CLIENT_EMAIL` | `client_email` |
-   | `FIREBASE_PRIVATE_KEY`  | `private_key`  |
-
-   Keep the private key in double quotes on one line, with its literal `\n` sequences. Never commit that JSON file.
-
-5. `localhost` is an authorized domain by default. For any other domain, add it under **Authentication > Settings > Authorized domains**.
-
-The `VITE_` values are public and are built into the web image, so rebuild after changing them: `docker compose up --build`.
-
-### 2. AI models (at least one)
-
-You have three ways in, and can mix them. **Free option:** an OpenRouter key runs OpenRouter's free models at no cost. **Without any key:** Ollama runs models on your own machine. **In the app:** each person can add their own keys under **Settings > AI models**, so you can leave all of these empty.
-
-Keys for the whole deployment go in `.env`:
-
-| `.env`               | Where to get it                                        |
-| -------------------- | ------------------------------------------------------ |
-| `ANTHROPIC_API_KEY`  | [console.anthropic.com](https://console.anthropic.com) |
-| `OPENAI_API_KEY`     | [platform.openai.com](https://platform.openai.com)     |
-| `GOOGLE_API_KEY`     | [aistudio.google.com](https://aistudio.google.com)     |
-| `OPENROUTER_API_KEY` | [openrouter.ai/keys](https://openrouter.ai/keys)       |
-
-`DEFAULT_MODEL` sets the model for plain chat, as `provider:model`. It defaults to `anthropic:claude-opus-5-5`. If you only have another provider's key, change it, for example `openai:<a model id you have access to>`.
-
-The model names the UI suggests are only suggestions. You can type any model id your provider offers.
-
-**OpenRouter.** The app reads the free model list live from OpenRouter, so it stays current, and you can switch between them in the chat box. For an OpenRouter default, use `DEFAULT_MODEL=openrouter:openrouter/free`, which lets OpenRouter pick a free model. `OPENROUTER_API_KEY` is shared by every user, so the server refuses paid models on it. Someone who adds their own key in Settings can use any model. OpenRouter limits how often free models can be called, and these limits are separate from the plan limits here. Some free model providers may keep prompts, so avoid sending anything private to them.
-
-**Ollama.** Install it from [ollama.com](https://ollama.com/download) and run `ollama pull llama3.2`. The app has a full guide at **Settings > AI models > Ollama > Open the Ollama guide** (`/app/settings/ollama`).
-
-| How the API runs | `.env`                                                                                         |
-| ---------------- | ---------------------------------------------------------------------------------------------- |
-| `npm run dev`    | `OLLAMA_BASE_URL=http://localhost:11434`                                                       |
-| Docker Compose   | `OLLAMA_DOCKER_URL=http://host.docker.internal:11434`, because `localhost` means the container |
-
-Everyone on the deployment can use the Ollama set here. The address box in Settings only accepts public addresses, such as a tunnel, because it is user input.
-
-### 3. Razorpay (paid plan, test mode only)
-
-Billing is optional. Without it, the Pro plan shows as not available and everything else works.
-
-This app takes test payments only, so no real money can move. The API refuses to start with a `RAZORPAY_KEY_ID` that does not begin with `rzp_test_`.
-
-1. In the [Razorpay dashboard](https://dashboard.razorpay.com), switch to **Test Mode**. Stay in it for the steps below, because test and live have separate keys, plans and webhooks.
-2. Go to **Account & Settings > API Keys** and generate a key pair:
-
-   | `.env`                | Value      |
-   | --------------------- | ---------- |
-   | `RAZORPAY_KEY_ID`     | Key id     |
-   | `RAZORPAY_KEY_SECRET` | Key secret |
-
-3. Go to **Subscriptions > Plans** and create a monthly plan. Put its id in `RAZORPAY_PRO_PLAN_ID`. Set `PRO_PLAN_PRICE_LABEL` to what it costs, for example `₹999 per month`, since that text is what the pricing section shows.
-4. Go to **Account & Settings > Webhooks** and add a webhook:
-   - **URL:** `https://<your-public-host>/api/webhooks/razorpay`
-   - **Secret:** any random string. Put the same string in `RAZORPAY_WEBHOOK_SECRET`.
-   - **Events:** `subscription.authenticated`, `subscription.activated`, `subscription.charged`, `subscription.pending`, `subscription.halted`, `subscription.paused`, `subscription.resumed`, `subscription.updated`, `subscription.cancelled`, `subscription.completed`.
-   - If the dashboard asks for an OTP in test mode, Razorpay's docs give `754081`.
-
-**On your own machine,** Razorpay cannot reach `localhost`, so use a tunnel such as `ngrok http 8080` for the webhook URL. Upgrading still works without one, because the app confirms the payment with Razorpay right after Checkout. Renewals, failed payments and cancellations do need the webhook.
-
-**To try it,** upgrade in the app with one of Razorpay's [test cards for subscriptions](https://razorpay.com/docs/payments/subscriptions/test/). To test renewals and failures, open the subscription in the dashboard and use **Charge this now**, then **Charge as Success** or **Charge as Failure**. One failure moves it to `pending` and four in a row to `halted`, and both move the account to the free plan. Test card tokens last 3 days, so make these charges soon after paying.
-
-### 4. MongoDB
-
-`docker compose` runs MongoDB for you. To use another database such as Atlas when running without Docker, set `MONGODB_URI`.
-
-## Environment variables
-
-| Variable                               | Required   | Purpose                                                                                                       |
-| -------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| `ENCRYPTION_KEY`                       | Yes        | 32 bytes, base64. Encrypts MCP credentials and API keys saved in Settings. Changing it makes them unreadable. |
-| `MONGODB_URI`                          | Yes        | Set by compose. Needed for local runs.                                                                        |
-| `FIREBASE_*`, `VITE_FIREBASE_*`        | To sign in | See step 1.                                                                                                   |
-| `OLLAMA_BASE_URL`, `OLLAMA_DOCKER_URL` | No         | Where the server finds Ollama. See step 2.                                                                    |
-| `*_API_KEY`, `DEFAULT_MODEL`           | To chat    | See step 2.                                                                                                   |
-| `RAZORPAY_*`, `PRO_PLAN_PRICE_LABEL`   | For Pro    | See step 3.                                                                                                   |
-| `CORS_ORIGINS`                         | Yes        | Comma-separated browser origins. Add your domain when you deploy, or requests get a 403.                      |
-| `TRUST_PROXY`                          | No         | Set to `true` behind one reverse proxy, so rate limits see real client addresses.                             |
-| `MCP_ALLOW_STDIO`                      | No         | Lets MCP servers run commands on the API host. See Security.                                                  |
-| `MCP_ALLOW_PRIVATE_NETWORKS`           | No         | Lets MCP servers use private addresses. For local development only.                                           |
-| `LOG_LEVEL`, `PORT`                    | No         | Logging and API port.                                                                                         |
-| `WEB_CONCURRENCY`                      | No         | API processes to run on one machine. Set it to the number of CPU cores. Default 1.                            |
-| `MONGODB_MAX_POOL_SIZE`                | No         | Database connections each process may open. Default 20.                                                       |
-| `RATE_LIMIT_PER_MINUTE`                | No         | Requests one address may make each minute. Default 300.                                                       |
-| `VITE_API_URL`                         | No         | Address of the API, when the client is hosted somewhere else. Read at build time.                             |
-
-## Try the whole product
-
-1. Sign in with Google or email.
-2. Open **Chat** and send a message. The reply streams in.
-3. Open **MCP servers**, add a server by URL, and choose **Test connection** to see its tools. To try a server on your own machine, set `MCP_ALLOW_PRIVATE_NETWORKS=true`, and use `host.docker.internal` as the host under Docker.
-4. Open **Agents > New agent**, attach that server, save, and send a message in the **Test** panel. Each tool call appears as a step you can open.
-5. Open **Workflows**, create one, add steps, drag between their jacks, then **Run**. An approval step pauses the run until you approve or reject it.
-6. Keep creating until you pass a limit. The free plan allows 2 agents, 1 MCP server, 2 workflows, 50 messages and 20 runs a month. You get a clear notice with a link to billing.
-7. Open **Billing > Upgrade to Pro** and pay with a Razorpay test card.
-
-## Promo codes (unlimited use)
-
-A promo code removes every limit on the account that redeems it. Use one for yourself as the owner, and hand others to anyone you want to give unlimited use. Codes work whether or not Razorpay is set up, and no payment is involved.
-
-Codes are made from the command line on a machine that can reach your database, never in the app. Run these from the repository root, where `.env` is:
+You need a MongoDB running. The quickest way:
 
 ```bash
-npm run promo -- create --label "Owner"
+docker run -d --name patchbay-mongo -p 127.0.0.1:27017:27017 mongo:8
 ```
 
-That prints a code such as `PB-7K2QD-M9XTR-4HWZA`. **Copy it now.** Only a hash is stored, so it cannot be shown again. Then sign in, open **Billing**, enter it under **Have a promo code?** and choose **Redeem code**.
-
-| Option         | Meaning                                       | Default |
-| -------------- | --------------------------------------------- | ------- |
-| `--count N`    | How many codes to make (up to 100)            | 1       |
-| `--uses N`     | How many different accounts can redeem a code | 1       |
-| `--days N`     | Days until an unused code stops working       | never   |
-| `--label TEXT` | A note for yourself, shown by `list`          | empty   |
-
-```bash
-npm run promo -- create --count 5 --days 30 --label "Beta testers"
-npm run promo -- create --uses 10 --label "Team"
-npm run promo -- list
-npm run promo -- revoke <id>
-```
-
-`list` shows each code's id, last four characters, state and how many times it was used. `revoke` stops a code working and takes unlimited use away from everyone who redeemed it. They go back to their own plan, free or paid Pro.
-
-**Where the API is hosted,** run the same command with that server's `MONGODB_URI` and `ENCRYPTION_KEY` in your local `.env`, or open a shell on the server and run `node dist/scripts/promo.js create` from the `server` folder. With Docker: `docker compose exec api node dist/scripts/promo.js create`.
-
-Unlimited use is still counted, so the dashboard shows real numbers. An unlimited account cannot start a paid checkout, since there is nothing left to buy. Redeeming is limited to 10 tries per address every 15 minutes, and a wrong, expired, revoked or used-up code all get the same reply.
-
-## Develop without Docker
-
-Needs Node 22 and a running MongoDB.
+Or install MongoDB Community Server, or point `MONGODB_URI` at an Atlas cluster. Then:
 
 ```bash
 npm install
@@ -255,15 +200,162 @@ npm install
 npm run dev
 ```
 
-The API runs on http://localhost:4000 and the client on http://localhost:5173, with `/api` proxied.
+- API: http://localhost:4000 (auto-reloads with `tsx watch`)
+- Client: http://localhost:5173 (Vite, with `/api` proxied to the API)
 
-## Tests
+`npm run dev` uses a shell `&`, which works on macOS and Linux. On Windows, run `npm run dev:server` and `npm run dev:client` in two terminals.
+
+### 3. Try the whole product
+
+1. Sign in with Google or email.
+2. Open **Chat** and send a message. The reply streams in.
+3. Open **MCP servers**, add a server by URL and choose **Test connection** to see its tools. For a server on your own machine, set `MCP_ALLOW_PRIVATE_NETWORKS=true`, and use `host.docker.internal` as the host under Docker.
+4. Open **Agents > New agent**, attach that server, save, and send a message in the **Test** panel. Each tool call shows as a step you can open.
+5. Open **Workflows**, create one, add steps, connect them, then **Run**. An approval step pauses the run until you approve or reject it.
+6. Keep creating until you hit a free-plan limit. You get a notice with a link to billing.
+7. Open **Billing > Upgrade to Pro** and pay with a Razorpay test card, or redeem a [promo code](#promo-codes).
+
+## Configuration
+
+Everything goes in the root `.env`, which is git-ignored. Both the server and the client read this one file, and Docker Compose uses it too.
+
+### 1. Firebase (sign-in)
+
+1. Create a project in the [Firebase console](https://console.firebase.google.com).
+2. Go to **Build > Authentication > Sign-in method** and enable **Google** and **Email/Password**.
+3. Go to **Project settings > General > Your apps**, add a **Web** app and copy its config:
+
+   | `.env`                      | Firebase config |
+   | --------------------------- | --------------- |
+   | `VITE_FIREBASE_API_KEY`     | `apiKey`        |
+   | `VITE_FIREBASE_AUTH_DOMAIN` | `authDomain`    |
+   | `VITE_FIREBASE_PROJECT_ID`  | `projectId`     |
+   | `VITE_FIREBASE_APP_ID`      | `appId`         |
+
+4. Go to **Project settings > Service accounts > Generate new private key** and copy from the downloaded JSON:
+
+   | `.env`                  | JSON field     |
+   | ----------------------- | -------------- |
+   | `FIREBASE_PROJECT_ID`   | `project_id`   |
+   | `FIREBASE_CLIENT_EMAIL` | `client_email` |
+   | `FIREBASE_PRIVATE_KEY`  | `private_key`  |
+
+   Keep the private key in double quotes on one line, with its literal `\n` sequences. Never commit the JSON file.
+
+5. `localhost` is authorized by default. Add every other domain you deploy to under **Authentication > Settings > Authorized domains**.
+
+### 2. AI models (at least one)
+
+Pick any mix of these:
+
+- **Free:** an OpenRouter key runs OpenRouter's free models at no cost.
+- **No key at all:** Ollama runs models on your own machine.
+- **Per user:** each person adds their own keys under **Settings > AI models**, so the deployment-wide keys can stay empty.
+
+Deployment-wide keys:
+
+| `.env`               | Where to get it                                        |
+| -------------------- | ------------------------------------------------------ |
+| `ANTHROPIC_API_KEY`  | [console.anthropic.com](https://console.anthropic.com) |
+| `OPENAI_API_KEY`     | [platform.openai.com](https://platform.openai.com)     |
+| `GOOGLE_API_KEY`     | [aistudio.google.com](https://aistudio.google.com)     |
+| `OPENROUTER_API_KEY` | [openrouter.ai/keys](https://openrouter.ai/keys)       |
+
+`DEFAULT_MODEL` is the model plain chat uses, as `provider:model`. Default: `anthropic:claude-opus-5-5`. If you only have another provider's key, change it, for example `openrouter:openrouter/free` or `openai:<model id>`. Model names in the UI are suggestions; any model id your provider offers works.
+
+**OpenRouter.** The free model list is read live from OpenRouter. `openrouter:openrouter/free` lets OpenRouter pick a free model. Because `OPENROUTER_API_KEY` is shared by every user, the server refuses paid models on it; users with their own key can use any model. OpenRouter rate-limits free models separately from this app's plan limits, and some free providers may log prompts.
+
+**Ollama.** Install from [ollama.com](https://ollama.com/download), then run `ollama pull llama3.2`. The app has a full guide at `/app/settings/ollama`.
+
+| How the API runs | `.env`                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| `npm run dev`    | `OLLAMA_BASE_URL=http://localhost:11434`                                             |
+| Docker Compose   | `OLLAMA_DOCKER_URL=http://host.docker.internal:11434` (`localhost` is the container) |
+
+The address box in Settings only accepts public addresses (such as a tunnel), because it is user input.
+
+### 3. Razorpay (optional, test mode only)
+
+Without Razorpay, the Pro plan shows as unavailable and everything else works. The API refuses to start with a `RAZORPAY_KEY_ID` that does not begin with `rzp_test_`, so no real money can move.
+
+1. In the [Razorpay dashboard](https://dashboard.razorpay.com), switch to **Test Mode** and stay in it.
+2. **Account & Settings > API Keys:** generate a key pair → `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`.
+3. **Subscriptions > Plans:** create a monthly plan → `RAZORPAY_PRO_PLAN_ID`. Set `PRO_PLAN_PRICE_LABEL` to match its price, for example `₹999 per month`.
+4. **Account & Settings > Webhooks:** add a webhook:
+   - **URL:** `https://<your-public-host>/api/webhooks/razorpay`
+   - **Secret:** any random string, also put in `RAZORPAY_WEBHOOK_SECRET`
+   - **Events:** `subscription.authenticated`, `subscription.activated`, `subscription.charged`, `subscription.pending`, `subscription.halted`, `subscription.paused`, `subscription.resumed`, `subscription.updated`, `subscription.cancelled`, `subscription.completed`
+   - If the dashboard asks for an OTP in test mode, Razorpay's docs give `754081`.
+
+**Locally,** Razorpay cannot reach `localhost`. Upgrading still works because the app verifies the payment right after Checkout, but renewals, failures and cancellations need the webhook, so use a tunnel such as `ngrok http 8080`.
+
+**To test,** pay with one of Razorpay's [subscription test cards](https://razorpay.com/docs/payments/subscriptions/test/). For renewals and failures, open the subscription in the dashboard and use **Charge this now**, then **Charge as Success** or **Charge as Failure**. One failure moves it to `pending`, four in a row to `halted`; both drop the account to the free plan. Test card tokens last 3 days.
+
+**Going live** is deliberately a code change, not a config change: the `rzp_test_` check lives in `server/src/config/env.ts`.
+
+### 4. MongoDB
+
+Docker Compose runs MongoDB for you. Without Docker, set `MONGODB_URI` to your local server or an Atlas connection string that includes the database name.
+
+## Environment variables
+
+Full template: [`.env.example`](.env.example). The API validates everything at startup and exits with a message naming any bad variable.
+
+| Variable                                                                                    | Required   | Default                     | Purpose                                                                                           |
+| ------------------------------------------------------------------------------------------- | ---------- | --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ENCRYPTION_KEY`                                                                            | Yes        | none                        | 32 bytes, base64. Encrypts saved MCP credentials and API keys. Changing it makes them unreadable. |
+| `MONGODB_URI`                                                                               | Yes        | none                        | MongoDB connection string. Compose sets its own.                                                  |
+| `CORS_ORIGINS`                                                                              | Yes        | `http://localhost:5173`     | Comma-separated browser origins allowed to call the API.                                          |
+| `NODE_ENV`                                                                                  | No         | `development`               | `development`, `test` or `production`.                                                            |
+| `PORT`                                                                                      | No         | `4000`                      | API port.                                                                                         |
+| `LOG_LEVEL`                                                                                 | No         | `info`                      | pino log level.                                                                                   |
+| `TRUST_PROXY`                                                                               | No         | `false`                     | `true` behind one reverse proxy, so rate limits see real client IPs.                              |
+| `WEB_CONCURRENCY`                                                                           | No         | `1`                         | API processes per machine. Set to CPU cores.                                                      |
+| `MONGODB_MAX_POOL_SIZE`                                                                     | No         | `20`                        | DB connections per process.                                                                       |
+| `RATE_LIMIT_PER_MINUTE`                                                                     | No         | `300`                       | Requests per IP per minute, per process.                                                          |
+| `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`                      | To sign in | none                        | Firebase Admin service account.                                                                   |
+| `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`, `OPENROUTER_API_KEY`               | To chat    | none                        | Deployment-wide model keys.                                                                       |
+| `DEFAULT_MODEL`                                                                             | No         | `anthropic:claude-opus-5-5` | `provider:model` for plain chat.                                                                  |
+| `OLLAMA_BASE_URL`                                                                           | No         | none                        | Ollama address for `npm run dev`.                                                                 |
+| `OLLAMA_DOCKER_URL`                                                                         | No         | none                        | Ollama address under Docker Compose.                                                              |
+| `MCP_ALLOW_STDIO`                                                                           | No         | `false`                     | Lets MCP servers run commands on the API host. See [Security](#security).                         |
+| `MCP_ALLOW_PRIVATE_NETWORKS`                                                                | No         | `false`                     | Lets MCP servers use private addresses. Local development only.                                   |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `RAZORPAY_PRO_PLAN_ID` | For Pro    | none                        | Razorpay test mode billing.                                                                       |
+| `PRO_PLAN_PRICE_LABEL`                                                                      | No         | `₹999 per month`            | Price text shown on the pricing section.                                                          |
+| `VITE_API_URL`                                                                              | No         | empty (same origin)         | API address when the client is hosted elsewhere. Build time only.                                 |
+| `VITE_FIREBASE_*`                                                                           | To sign in | none                        | Firebase web config. Public. Build time only.                                                     |
+
+`VITE_*` values are public and inlined into the client bundle. Never put secrets in them.
+
+## Scripts
+
+Run from the repository root.
+
+| Command                               | What it does                                         |
+| ------------------------------------- | ---------------------------------------------------- |
+| `npm run dev`                         | API and client together with hot reload              |
+| `npm run dev:server`                  | API only                                             |
+| `npm run dev:client`                  | Client only                                          |
+| `npm run build`                       | Build both workspaces (`server/dist`, `client/dist`) |
+| `npm run typecheck`                   | TypeScript check on both workspaces                  |
+| `npm run lint` / `lint:fix`           | ESLint                                               |
+| `npm run format` / `format:check`     | Prettier                                             |
+| `npm test`                            | Unit and integration tests                           |
+| `npm run test:e2e`                    | Playwright smoke test                                |
+| `npm run verify`                      | Typecheck, lint, format check and tests (same as CI) |
+| `npm run promo -- <cmd>`              | Promo code CLI, see [Promo codes](#promo-codes)      |
+| `npm run loadtest --workspace server` | autocannon load test against an in-memory database   |
+| `npm start --workspace server`        | Run the built API (`node dist/index.js`)             |
+
+## Testing
 
 ```bash
 npm run verify
 ```
 
-That runs typecheck, lint, format check, and unit and integration tests. Server tests use an in-memory MongoDB and a real MCP server, so they need no accounts.
+Runs typecheck, lint, format check, and all unit and integration tests. Server tests use an in-memory MongoDB, a scripted model and a real MCP server, so they need no accounts or keys.
+
+End-to-end smoke test:
 
 ```bash
 npm exec --workspace client -- playwright install chromium
@@ -273,149 +365,288 @@ npm exec --workspace client -- playwright install chromium
 npm run test:e2e
 ```
 
-The smoke test runs the real UI against fake sign-in and a scripted API (`client/vite.e2e.config.ts`). That setup lives outside `src`, so no sign-in bypass reaches a production build. You can also browse it yourself with `npm run dev:e2e --workspace client` on http://localhost:5199.
+It runs the real UI against fake sign-in and a mocked API (`client/vite.e2e.config.ts`). That setup lives outside `src`, so no sign-in bypass reaches a production build. Browse it yourself with `npm run dev:e2e --workspace client` on http://localhost:5199.
 
-## Architecture
-
-```
-client/   React, Vite, Tailwind, shadcn/ui, Redux Toolkit, RTK Query, React Router, React Flow, three.js
-server/   Express, Mongoose, Zod, LangChain, LangGraph, MCP adapters, firebase-admin, Razorpay
-```
-
-- **Chat and agents** share one LangGraph loop: `llm -> tools -> llm`. A MongoDB checkpointer stores each thread (`server/src/services/graphs/chatGraph.ts`, `agentGraph.ts`).
-- **Workflows** compile a saved document into a `StateGraph` (`workflowGraph.ts`). Approval steps use LangGraph interrupts. Runs execute in the background, and the client polls them.
-- **Streaming** uses SSE with the events `token`, `tool_start`, `tool_end`, `interrupt`, `done` and `error`.
-- **Limits** are enforced by `planGuard` (`server/src/middleware/planGuard.ts`), which returns 402 with the code `PLAN_LIMIT_REACHED`.
+CI (`.github/workflows/ci.yml`) runs `verify` plus build, the Playwright test and a Docker image build on every push to `main` and every pull request.
 
 ## Host it for free
 
-Every part can run on a free plan. This suits a demo or a portfolio, not paying customers: the API sleeps when idle, the free database has no backups, and free tiers change without notice, so check each provider's current limits before you sign up.
+Every part runs on a free tier. Good for demos and portfolios, not paying customers: the free API sleeps when idle, the free database has no backups, and free tiers change, so check current limits before signing up.
 
-| Part     | Free host                 | Set up with                    |
-| -------- | ------------------------- | ------------------------------ |
-| Client   | Cloudflare Pages          | The dashboard settings below   |
-| API      | Render, free web service  | `render.yaml` at the repo root |
-| Database | MongoDB Atlas, M0 cluster | The Atlas dashboard            |
-| Sign-in  | Firebase, Spark plan      | Setup step 1 above             |
-| Models   | OpenRouter's free models  | An `OPENROUTER_API_KEY`        |
-| Payments | Razorpay test mode        | Setup step 3 above             |
+| Part     | Free host               | Set up with                                          |
+| -------- | ----------------------- | ---------------------------------------------------- |
+| Client   | Cloudflare Pages        | Dashboard settings below                             |
+| API      | Render free web service | `render.yaml`                                        |
+| Database | MongoDB Atlas M0        | Atlas dashboard                                      |
+| Sign-in  | Firebase Spark plan     | [Configuration](#1-firebase-sign-in)                 |
+| Models   | OpenRouter free models  | `OPENROUTER_API_KEY`                                 |
+| Payments | Razorpay test mode      | [Configuration](#3-razorpay-optional-test-mode-only) |
 
-Ollama does not work here, because the API runs on Render, not on your computer. Both Render and Cloudflare deploy from a Git host, so push the repository to GitHub first.
+Ollama does not work here, because the API runs on Render, not your computer. Push the repository to GitHub first; both Render and Cloudflare deploy from Git.
 
 ### 1. Database on MongoDB Atlas
 
-1. Create a free M0 cluster. Mumbai (`ap-south-1`) is closest to Render's Singapore region.
-2. Under **Database Access**, add a user with a generated password.
-3. Under **Network Access**, allow `0.0.0.0/0`. Render's free plan has no fixed outbound address.
-4. Copy the connection string and add a database name before the `?`, such as `.../patchbay?retryWrites=true`.
+1. Create a free M0 cluster. Pick a region near your API (for Render Singapore, Mumbai `ap-south-1` is close).
+2. **Database Access:** add a user with a generated password.
+3. **Network Access:** allow `0.0.0.0/0`, since Render's free plan has no fixed outbound IP.
+4. Copy the connection string and add a database name before the `?`, for example `.../patchbay?retryWrites=true`.
 
 ### 2. API on Render
 
-1. In the Render dashboard, choose **New > Blueprint** and pick the repository. Render reads `render.yaml`.
-2. Fill in the values it asks for. They are the same as in `.env`, with these differences:
-   - `CORS_ORIGINS` is your Cloudflare Pages address, such as `https://patchbay.pages.dev`. If you do not know it yet, put a placeholder and change it after step 3.
-   - `MONGODB_URI` is the Atlas string from step 1.
-   - `ENCRYPTION_KEY` must be new: run `openssl rand -base64 32`. Do not change it later, or saved MCP credentials and API keys become unreadable.
+1. In Render, choose **New > Blueprint** and pick the repository. Render reads `render.yaml`.
+2. Fill in the values it asks for (same as `.env`), noting:
+   - `CORS_ORIGINS`: your Pages address, such as `https://patchbay.pages.dev`. Use a placeholder if you don't know it yet, and fix it after step 3.
+   - `MONGODB_URI`: the Atlas string.
+   - `ENCRYPTION_KEY`: a new one from `openssl rand -base64 32`. Never change it later.
    - Leave unused model and Razorpay keys empty.
-3. Wait for the deploy, then open `https://<service>.onrender.com/api/health`. It should show `"status":"ok"`.
+3. When the deploy finishes, open `https://<service>.onrender.com/api/health`. It should return `"status":"ok"`.
 
-`render.yaml` already sets `NODE_ENV=production`, `TRUST_PROXY=true`, one process, a pool of 10 connections and `DEFAULT_MODEL=openrouter:openrouter/free`. The values you type are only asked for when the Blueprint is first applied. Change them later under the service's **Environment** tab.
+`render.yaml` already sets `NODE_ENV=production`, `TRUST_PROXY=true`, `WEB_CONCURRENCY=1`, `MONGODB_MAX_POOL_SIZE=10` and `DEFAULT_MODEL=openrouter:openrouter/free`. Values you type are only asked for the first time; change them later in the service's **Environment** tab.
 
 ### 3. Client on Cloudflare Pages
 
-Cloudflare Pages has no file for build settings, so enter these under **Workers & Pages > Create > Pages > Connect to Git**:
+Go to **Workers & Pages > Create > Pages > Connect to Git** and enter:
 
 | Setting                | Value                              |
 | ---------------------- | ---------------------------------- |
 | Framework preset       | None                               |
 | Build command          | `npm run build --workspace client` |
 | Build output directory | `client/dist`                      |
-| Root directory         | Leave empty (the repo root)        |
+| Root directory         | Empty (repository root)            |
 
-Add these build variables. The client reads them when it is built, so rebuild after changing any of them:
+Build variables (read at build time, so redeploy after changing them):
 
-| Variable                      | Value                                                                  |
-| ----------------------------- | ---------------------------------------------------------------------- |
-| `VITE_API_URL`                | `https://<service>.onrender.com`, with no `/api` and no trailing slash |
-| `VITE_FIREBASE_API_KEY`       | From your Firebase web app config                                      |
-| `VITE_FIREBASE_AUTH_DOMAIN`   | From your Firebase web app config                                      |
-| `VITE_FIREBASE_PROJECT_ID`    | From your Firebase web app config                                      |
-| `VITE_FIREBASE_APP_ID`        | From your Firebase web app config                                      |
-| `MONGOMS_DISABLE_POSTINSTALL` | `1`, which skips downloading the MongoDB binary that only tests need   |
+| Variable                      | Value                                                         |
+| ----------------------------- | ------------------------------------------------------------- |
+| `VITE_API_URL`                | `https://<service>.onrender.com` (no `/api`, no trailing `/`) |
+| `VITE_FIREBASE_API_KEY`       | From your Firebase web config                                 |
+| `VITE_FIREBASE_AUTH_DOMAIN`   | From your Firebase web config                                 |
+| `VITE_FIREBASE_PROJECT_ID`    | From your Firebase web config                                 |
+| `VITE_FIREBASE_APP_ID`        | From your Firebase web config                                 |
+| `MONGOMS_DISABLE_POSTINSTALL` | `1` (skips the MongoDB binary only tests need)                |
 
-Pages installs dependencies itself, and takes the Node version from `.nvmrc`. The `_headers` and `_redirects` files in `client/public` are already part of the build.
+Pages takes the Node version from `.nvmrc`. `client/public/_headers` and `_redirects` handle caching, security headers and SPA routing. Netlify works the same way with the same settings.
 
 ### 4. Connect the pieces
 
-1. On Render, set `CORS_ORIGINS` to the Pages address, if you used a placeholder. Preview deployments get other addresses, so they cannot reach the API unless you add those too.
-2. In Firebase, add the Pages domain under **Authentication > Settings > Authorized domains**.
-3. In the Razorpay dashboard, in test mode, add a webhook to `https://<service>.onrender.com/api/webhooks/razorpay` with the same secret as `RAZORPAY_WEBHOOK_SECRET`.
+1. On Render, set `CORS_ORIGINS` to the Pages address. Preview deployments get other addresses and need adding too.
+2. In Firebase, add the Pages domain under **Authorized domains**.
+3. In Razorpay test mode, point the webhook at `https://<service>.onrender.com/api/webhooks/razorpay`.
 
 ### 5. Keep the API awake (optional)
 
-A free Render service sleeps after about 15 minutes without requests, and the next request waits about a minute while it starts. A workflow that is running when it sleeps stops, and is marked failed when the API starts again.
-
-To avoid that, have a free uptime monitor, such as UptimeRobot or cron-job.org, open `https://<service>.onrender.com/api/health` every 10 minutes. One service awake all month fits in Render's free hours.
+A free Render service sleeps after about 15 minutes idle and takes about a minute to wake. A workflow running when it sleeps is marked failed on restart. A free uptime monitor (UptimeRobot, cron-job.org) hitting `/api/health` every 10 minutes keeps it awake, and one always-on service fits in Render's free monthly hours.
 
 ### 6. Check it
 
-Sign in on the Pages site, send a chat message, and run a workflow that has an approval step. If sign-in fails, check the authorized domain. If every request fails, check `CORS_ORIGINS` and `VITE_API_URL`.
+Sign in on the Pages site, send a chat message and run a workflow with an approval step. If sign-in fails, check authorized domains. If every request fails, check `CORS_ORIGINS` and `VITE_API_URL`.
 
-## Running it for many people
+## Host it on a paid plan
 
-What is built in:
+For real users you want an API that never sleeps, a database with backups, and TLS. Two routes. Check each provider's current pricing.
 
-- **The client is static files.** Host `client/dist` on a free CDN such as Cloudflare Pages or Netlify. The build includes their `_headers` and `_redirects` files. Build with `VITE_API_URL` set to your API's address, and add the site's origin to `CORS_ORIGINS`.
-- **The landing page does not need the API.** It has the plans built in, and the API's plan list can be cached for 5 minutes.
-- **The API can run as many processes as you have cores.** Set `WEB_CONCURRENCY`. You can also run it on several machines behind a load balancer, because it keeps no session state.
-- **A restart does not fail other machines' workflow runs.** Each process only fails runs that stopped reporting in for 5 minutes.
-- **JSON replies are gzipped.** Chat streams are not, so tokens still arrive one by one.
+### Option A: one VPS with Docker Compose (cheapest, full control)
 
-What was measured, with `npm run loadtest --workspace server` on an 8-core Apple M3. This is one API process, an in-memory MongoDB, and the sign-in check stubbed out:
+Any Linux VPS with 2 GB RAM or more works: Hetzner, DigitalOcean, Linode/Akamai, Vultr, AWS Lightsail, and so on.
 
-| Route             | 200 connections         | 1,000 connections                     |
-| ----------------- | ----------------------- | ------------------------------------- |
-| Health            | 8,718 req/s, p99 39 ms  | 8,382 req/s, p99 87 ms, 848 failed    |
-| Public plan list  | 8,291 req/s, p99 33 ms  | 8,025 req/s, p99 98 ms, 888 failed    |
-| Account and usage | 1,967 req/s, p99 191 ms | 1,692 req/s, p99 5,159 ms, 688 failed |
-| List agents       | 2,772 req/s, p99 89 ms  | 2,302 req/s, p99 5,062 ms, 501 failed |
+1. **Create the server** (Ubuntu LTS), point a domain's `A` record at its IP, and open only SSH, 80 and 443:
 
-One process is comfortable with a few hundred requests in flight and starts refusing connections at 1,000.
+   ```bash
+   sudo ufw allow OpenSSH && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw enable
+   ```
 
-What that means for 50,000 people at once:
+2. **Install Docker** with the official script:
 
-- **50,000 people reading the landing page is the CDN's work,** not this code's. We did not test a CDN.
-- **50,000 signed-in people is not proven.** If each makes a request every 20 seconds, that is 2,500 requests a second, which is more than one process handled on signed-in routes. It needs several processes and a database that keeps up. Nothing here was tested beyond one process.
-- **A free database will give out first.** Free MongoDB tiers cap connections and throttle operations. The numbers above used a database in memory on the same machine.
-- **Models are the other limit.** A shared free OpenRouter key has a low limit for the whole deployment. At scale each person needs their own key or their own Ollama.
-- **Rate limits are counted per process.** With 4 processes, a client can make 4 times `RATE_LIMIT_PER_MINUTE`.
+   ```bash
+   curl -fsSL https://get.docker.com | sh
+   ```
+
+3. **Clone and configure:**
+
+   ```bash
+   git clone https://github.com/hi-vishal/PatchBay.git patchbay && cd patchbay && cp .env.example .env
+   ```
+
+   In `.env` set `ENCRYPTION_KEY`, Firebase, model keys, `CORS_ORIGINS=https://your-domain.com`, `NODE_ENV=production`, and `WEB_CONCURRENCY` to the number of CPU cores. Leave `VITE_API_URL` empty, because nginx serves the client and API on one origin.
+
+4. **Start the stack:**
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+5. **Add TLS.** Compose listens on `127.0.0.1:8080` only, so put a reverse proxy in front. [Caddy](https://caddyserver.com/docs/install) gets certificates automatically. `/etc/caddy/Caddyfile`:
+
+   ```
+   your-domain.com {
+       reverse_proxy 127.0.0.1:8080
+   }
+   ```
+
+   ```bash
+   sudo systemctl reload caddy
+   ```
+
+   Caddy streams SSE without buffering, so chat tokens still arrive live.
+
+6. **Finish:** add the domain to Firebase **Authorized domains**, and point the Razorpay webhook at `https://your-domain.com/api/webhooks/razorpay`.
+
+**Database.** The Compose MongoDB has no password and is reachable only from the server itself. Back up the `mongo-data` volume regularly (for example `docker compose exec mongo mongodump --archive > backup.archive`), or use a managed database such as MongoDB Atlas: change `MONGODB_URI` under the `api` service in `docker-compose.yml` and remove the `mongo` service.
+
+**Updating:**
+
+```bash
+git pull && docker compose up -d --build
+```
+
+### Option B: managed services (least maintenance)
+
+| Part     | Paid host                                         | Notes                                                                                                                                    |
+| -------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| API      | Render paid instance (Starter or above)           | Change `plan: free` to a paid plan in `render.yaml`, or in the dashboard. No sleep, more memory. Raise `WEB_CONCURRENCY` with CPU count. |
+| API alt. | Railway, Fly.io, Google Cloud Run, AWS App Runner | Any Docker host works: build `server/Dockerfile` with the repo root as context, expose port 4000, health check `/api/health`.            |
+| Database | MongoDB Atlas dedicated tier (M10 or above)       | Backups, more connections. Restrict Network Access to your API's IPs if it has static egress.                                            |
+| Client   | Cloudflare Pages, Netlify or Vercel               | Static files; free tiers are usually enough even in production.                                                                          |
+| Sign-in  | Firebase Blaze plan                               | Only needed past Spark limits or for phone auth.                                                                                         |
+| Models   | Paid provider keys, or users' own keys            | Shared free OpenRouter limits are low for many users.                                                                                    |
+
+On long-running hosts that put a proxy in front (Render, Railway, Fly.io), keep `TRUST_PROXY=true`. On serverless hosts such as Cloud Run, set a minimum of one instance so background workflow runs are not cut off.
+
+## Promo codes
+
+A promo code removes every limit on the account that redeems it. Use one for yourself as the owner, and give others to anyone you want to have unlimited use. Codes work with or without Razorpay.
+
+Codes are created from the command line on a machine that can reach your database, never in the app. From the repository root:
+
+```bash
+npm run promo -- create --label "Owner"
+```
+
+That prints a code such as `PB-7K2QD-M9XTR-4HWZA`. **Copy it now**: only a hash is stored. Then sign in, open **Billing**, enter it under **Have a promo code?** and choose **Redeem code**.
+
+| Option         | Meaning                                | Default |
+| -------------- | -------------------------------------- | ------- |
+| `--count N`    | How many codes to make (up to 100)     | 1       |
+| `--uses N`     | How many accounts can redeem each code | 1       |
+| `--days N`     | Days until an unused code expires      | never   |
+| `--label TEXT` | A note for yourself, shown by `list`   | empty   |
+
+```bash
+npm run promo -- create --count 5 --days 30 --label "Beta testers"
+npm run promo -- list
+npm run promo -- revoke <id>
+```
+
+`revoke` disables a code and removes unlimited use from everyone who redeemed it; they go back to their own plan.
+
+**On a hosted API:** put that server's `MONGODB_URI` and `ENCRYPTION_KEY` in your local `.env` and run the same command, or run it on the server:
+
+```bash
+docker compose exec api node dist/scripts/promo.js create
+```
+
+Usage is still counted for unlimited accounts. Redeeming is limited to 10 tries per IP every 15 minutes.
+
+## Plans and limits
+
+Monthly limits, enforced on the server by `server/src/middleware/planGuard.ts`, which returns `402 PLAN_LIMIT_REACHED`.
+
+| Limit         | Free | Pro   | Promo (unlimited) |
+| ------------- | ---- | ----- | ----------------- |
+| Chat messages | 50   | 2,000 | No limit          |
+| Workflow runs | 20   | 500   | No limit          |
+| Agents        | 2    | 50    | No limit          |
+| MCP servers   | 1    | 20    | No limit          |
+| Workflows     | 2    | 50    | No limit          |
+
+Change them in `server/src/services/billing/plans.ts`.
+
+## Architecture
+
+```
+Browser ──► web (nginx / CDN) ──/api──► api (Express) ──► MongoDB
+                                         │
+                                         ├─► LLM providers (OpenAI, Anthropic, Google, OpenRouter, Ollama)
+                                         ├─► MCP servers (HTTP / SSE)
+                                         ├─► Firebase Admin (verify ID tokens)
+                                         └─► Razorpay (subscriptions, webhooks)
+```
+
+- **Auth.** The client signs in with Firebase and sends the ID token as a Bearer token. The API verifies it with firebase-admin (`server/src/middleware/protect.ts`).
+- **Chat and agents** share one LangGraph loop, `llm → tools → llm`, with a MongoDB checkpointer per thread (`server/src/services/graphs/chatGraph.ts`, `agentGraph.ts`).
+- **Workflows** compile a saved board into a LangGraph `StateGraph` (`workflowGraph.ts`). Approval steps use LangGraph interrupts. Runs execute in the background and the client polls them.
+- **Streaming** uses Server-Sent Events with `token`, `tool_start`, `tool_end`, `interrupt`, `done` and `error` events.
+- **Client state** uses Redux Toolkit and RTK Query; the board uses React Flow.
+
+## API overview
+
+All routes are under `/api`. Everything except health, plans and the webhook needs a Firebase ID token.
+
+| Method and path                                                                                                          | Purpose                                        |
+| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| `GET /health`                                                                                                            | Health check                                   |
+| `POST /auth/sync`, `GET /me`                                                                                             | Create or sync the user, get account and usage |
+| `POST /chat`                                                                                                             | Streaming chat (SSE)                           |
+| `GET /llm/providers`, `GET/PATCH /llm/settings`, `GET /llm/ollama/status`                                                | Models and per-user keys                       |
+| `GET/POST /conversations`, `GET/PATCH/DELETE /conversations/:id`, `GET /conversations/:id/messages`                      | Chat history                                   |
+| `GET/POST /agents`, `GET/PATCH/DELETE /agents/:id`, `POST /agents/:id/chat`                                              | Agents and agent chat (SSE)                    |
+| `GET/POST /mcp-servers`, `GET/PATCH/DELETE /mcp-servers/:id`, `POST /mcp-servers/:id/test`, `GET /mcp-servers/:id/tools` | MCP servers                                    |
+| `GET/POST /workflows`, `GET/PATCH/DELETE /workflows/:id`, `POST /workflows/:id/run`                                      | Workflows                                      |
+| `GET /runs`, `GET /runs/:id`, `POST /runs/:id/resume`                                                                    | Workflow runs and approvals                    |
+| `GET /billing/plans`, `POST /billing/subscribe`, `/verify`, `/cancel`, `/redeem`                                         | Billing and promo codes                        |
+| `POST /webhooks/razorpay`                                                                                                | Razorpay webhook (signature checked)           |
+
+## Scaling
+
+- **The client is static.** Serve `client/dist` from any CDN. The landing page has plans built in and works without the API.
+- **The API is stateless.** Run more processes with `WEB_CONCURRENCY`, or more machines behind a load balancer.
+- **Workflow runs survive restarts elsewhere.** A process only fails runs that stopped reporting for 5 minutes.
+- **JSON is gzipped; streams are not,** so tokens arrive one by one.
+- **Watch the database pool.** Keep `WEB_CONCURRENCY × MONGODB_MAX_POOL_SIZE × instances` under your database's connection limit (500 on Atlas M0).
+- **Rate limits are per process.** With 4 processes, a client can make 4 × `RATE_LIMIT_PER_MINUTE` requests.
+- **Load test:** `npm run loadtest --workspace server`. On one process (8-core laptop, in-memory DB), public routes handled about 8,000 req/s and signed-in routes about 2,000 req/s at 200 connections.
 
 ## Security
 
-- **Do not enable `MCP_ALLOW_STDIO` on a shared deployment.** It lets any signed-in user run commands on the API host.
-- **`http_request` and `web_fetch` block private addresses.** Checks run before the request, on every redirect, and again when the socket connects.
-- **API keys saved in Settings are encrypted** with AES-256-GCM. The API only ever returns whether a key exists and its last 4 characters.
-- **The Ollama address in Settings must be public,** and is checked again on every connection. Only `.env` can point at a private address, because any signed-in user can edit Settings.
-- **MCP over HTTP has a weaker check.** The adapter does not allow a custom fetch, so URLs are checked only before connecting. A malicious MCP host could still redirect or rebind.
-- **Tool output is untrusted.** Web pages and MCP tools can try to mislead a model. Give agents only the tools they need, and use approval steps for actions that matter.
-- **MongoDB has no password in `docker-compose.yml`,** and its port is published on `127.0.0.1` only. Use a managed or password-protected database in production.
-- **The compose file serves plain HTTP.** Put TLS in front of it in production.
+- **Never enable `MCP_ALLOW_STDIO` on a shared deployment.** It lets any signed-in user run commands on the API host.
+- **SSRF protection.** `http_request` and `web_fetch` block private addresses before the request, on every redirect, and when the socket connects.
+- **Secrets at rest.** API keys and MCP credentials are encrypted with AES-256-GCM. The API only returns whether a key exists and its last 4 characters.
+- **Ollama in Settings must be public,** and is re-checked on every connection. Only `.env` can point at a private address.
+- **MCP over HTTP has a weaker check.** URLs are validated only before connecting, so a malicious MCP host could still redirect or rebind.
+- **Tool output is untrusted.** Web pages and MCP tools can try to mislead a model. Give agents only the tools they need and use approval steps for actions that matter.
+- **Hardening built in:** helmet headers, CORS allow-list, rate limits, request validation with Zod, input sanitizing, ownership checks on every resource.
+- **Docker Compose MongoDB has no password** and binds to `127.0.0.1`. Use a managed or password-protected database in production.
+- **Compose serves plain HTTP.** Put TLS in front of it (see [Host it on a paid plan](#host-it-on-a-paid-plan)).
+- **Never commit `.env` or the Firebase service account JSON.** Both are git-ignored.
 
 ## Troubleshooting
 
-| Symptom                                             | Fix                                                                                                                            |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| API exits with `Invalid environment configuration`  | The message names the variable. Usually `ENCRYPTION_KEY`.                                                                      |
-| Requests fail with `CORS_NOT_ALLOWED`               | Add the page's origin to `CORS_ORIGINS`.                                                                                       |
-| Sign-in page says it is not set up                  | The `VITE_FIREBASE_*` values were empty at build time. Set them and rebuild.                                                   |
-| `AUTH_NOT_CONFIGURED`                               | The server-side `FIREBASE_*` values are missing.                                                                               |
-| "No AI provider is set up"                          | Add a key under Settings > AI models, or to `.env` and restart the API.                                                        |
-| "Ollama is not connected"                           | Follow the guide at `/app/settings/ollama`. Run `curl http://localhost:11434/api/tags` first.                                  |
-| `MODEL_NOT_FREE`                                    | That OpenRouter model is paid. Pick a free one, or add your own key in Settings.                                               |
-| `URL_NOT_ALLOWED` on an MCP server                  | It resolves to a private address. Use a public URL, or `MCP_ALLOW_PRIVATE_NETWORKS` locally.                                   |
-| Plan stays Pro after cancelling, on a local machine | The webhook cannot reach you. Use a tunnel.                                                                                    |
-| API exits naming `RAZORPAY_KEY_ID`                  | This app is test mode only. Use a key that begins `rzp_test_`.                                                                 |
-| `PAYMENT_PROVIDER_ERROR`                            | Razorpay refused the request, and the API log has its reason. Often a wrong plan id, or a plan from live mode with a test key. |
+| Symptom                                            | Fix                                                                                                  |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| API exits with `Invalid environment configuration` | The message names the variable, usually `ENCRYPTION_KEY`.                                            |
+| `Cannot connect to the Docker daemon`              | Start Docker Desktop, or `colima start`.                                                             |
+| Requests fail with `CORS_NOT_ALLOWED`              | Add the page's origin to `CORS_ORIGINS` and restart the API.                                         |
+| Sign-in page says it is not set up                 | `VITE_FIREBASE_*` were empty at build time. Set them and rebuild.                                    |
+| `AUTH_NOT_CONFIGURED`                              | The server-side `FIREBASE_*` values are missing.                                                     |
+| Sign-in popup fails on a deployed site             | Add the domain to Firebase **Authorized domains**.                                                   |
+| "No AI provider is set up"                         | Add a key under Settings > AI models, or in `.env` and restart the API.                              |
+| "Ollama is not connected"                          | Follow `/app/settings/ollama`. Check `curl http://localhost:11434/api/tags` first.                   |
+| `MODEL_NOT_FREE`                                   | That OpenRouter model is paid. Pick a free one, or add your own key in Settings.                     |
+| `URL_NOT_ALLOWED` on an MCP server                 | It resolves to a private address. Use a public URL, or `MCP_ALLOW_PRIVATE_NETWORKS` locally.         |
+| API exits naming `RAZORPAY_KEY_ID`                 | Test mode only. Use a key starting with `rzp_test_`.                                                 |
+| `PAYMENT_PROVIDER_ERROR`                           | Razorpay refused the request; the API log has the reason. Often a wrong plan id or a live-mode plan. |
+| Plan stays Pro after cancelling, locally           | The webhook cannot reach you. Use a tunnel.                                                          |
+| First request on Render takes a minute             | The free instance was asleep. See [Keep the API awake](#5-keep-the-api-awake-optional).              |
+| Port 8080, 4000 or 27017 already in use            | Stop the other process, or change the host port in `docker-compose.yml`.                             |
+
+## Contributing
+
+1. Create a branch from `main`.
+2. Make your change with tests.
+3. Run `npm run verify` (and `npm run test:e2e` for UI changes).
+4. Open a pull request. CI must pass.
+
+Code style is enforced by ESLint and Prettier (`npm run lint:fix`, `npm run format`).
 
 ## Author
 
@@ -425,8 +656,12 @@ What that means for 50,000 people at once:
 
 Questions, ideas and bug reports are welcome. Open an issue or send an email.
 
-## Trademark and copyright
+## License
 
-Patchbay™ is a trademark of Vishal Gupta. The name and logo may not be used for other products or services without written permission.
+Patchbay is released under the [MIT License](LICENSE). You may use, copy, modify, merge, publish, distribute, sublicense and sell copies of the software, provided the copyright notice and license text are kept in all copies or substantial portions.
 
-© 2026 Vishal Gupta. All rights reserved.
+© 2026 Vishal Gupta.
+
+### Trademark
+
+Patchbay™ is a trademark of Vishal Gupta. The MIT License covers the code only. It does not grant rights to the Patchbay name or logo. If you ship a fork or a derived product, give it a different name and logo.
